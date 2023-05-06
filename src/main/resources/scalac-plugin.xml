@@ -1,0 +1,4 @@
+<plugin>
+  <name>zio</name>
+  <classname>zio.Plugin</classname>
+</plugin>
