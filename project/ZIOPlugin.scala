@@ -5,12 +5,16 @@ import sbt.Keys.*
 
 object ZIOPlugin extends AutoPlugin {
 
-  val zioPluginJar     = taskKey[File]("Location of the ZIO Plugin jar.")
+  object autoImport {
+    val zioPluginJar = taskKey[File]("Location of the ZIO Plugin jar.")
+  }
+
   override def trigger = allRequirements
 
+  import autoImport.*
   override lazy val projectSettings: Seq[Setting[?]] = Seq(
     zioPluginJar := Def.taskDyn {
-      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/zio-clippy-${scalaVersion.value}.jar""")
+      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/zio-clippy_${scalaBinaryVersion.value}.jar""")
       if (jar.isFile) Def.task {
         jar
       }

@@ -6,7 +6,6 @@ inThisBuild(
       "2.12.15", // the version of scala used by sbt 1.6.2
       "2.12.16", // the version of scala used by sbt 1.7.2
       "2.12.17", // the version of scala used by sbt 1.8.2
-      "2.11.12",
       "3.2.2"
     ),
     scalaVersion := (ThisBuild / crossScalaVersions).value.head,
@@ -19,6 +18,7 @@ inThisBuild(
 val install = taskKey[Unit]("Install the ZIO Clippy compiler plugin.")
 
 lazy val root = (project in file(".")).settings(
+  name := "zio-clippy",
   Compile / unmanagedSourceDirectories ++= {
     val dir                  = (Compile / scalaSource).value
     val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
@@ -34,15 +34,18 @@ lazy val root = (project in file(".")).settings(
   libraryDependencies ++= {
     if (scalaVersion.value.startsWith("3."))
       Seq(
-        "org.scala-lang" % "scala3-compiler_3" % scalaVersion.value
+        "org.scala-lang" % "scala3-compiler_3" % scalaVersion.value % "provided"
       )
     else
       Seq(
-        "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-        "org.scala-lang" % "scala-reflect"  % scalaVersion.value
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+        "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided"
       )
   },
-  crossTarget                := target.value / s"scala-${scalaVersion.value}",
+  crossTarget := target.value / s"scala-${scalaVersion.value}",
+  assembly / assemblyOption ~= {
+    _.withIncludeScala(false)
+  },
   assembly / assemblyJarName := "zio-clippy.jar",
   install := {
     streams.value.log.info(s"Installing ${zioPluginJar.value}")
