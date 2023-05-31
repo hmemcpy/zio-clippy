@@ -1,6 +1,18 @@
+import xerial.sbt.Sonatype._
+
 inThisBuild(
   Seq(
     organization := "com.hmemcpy",
+    homepage     := Some(url("https://github.com/hmemcpy/zio-clippy")),
+    licenses     := License.Apache2 :: Nil,
+    developers := List(
+      Developer(
+        "hmemcpy",
+        "Igal Tabachnik",
+        "hmemcpy@gmail.com",
+        url("https://hmemcpy.com")
+      )
+    ),
     crossScalaVersions := List(
       "2.13.10",
       "2.12.15", // the version of scala used by sbt 1.6.2
@@ -54,5 +66,8 @@ lazy val root = (project in file(".")).settings(
     val plugin = file(s"""${sys.props("user.home")}/.sbt/1.0/plugins/ZIOPlugin.scala""")
     streams.value.log.info(s"Installing $plugin")
     IO.copyFile(file("project/ZIOPlugin.scala"), plugin)
-  }
+  },
+  sonatypeCredentialHost := "s01.oss.sonatype.org",
+  sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
+  sonatypeProjectHosting := Some(GitHubHosting("hmemcpy", "zio-clippy", "Igal Tabachnik", "hmemcpy@gmail.com"))
 )

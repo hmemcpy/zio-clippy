@@ -14,7 +14,7 @@ object ZIOPlugin extends AutoPlugin {
   import autoImport.*
   override lazy val projectSettings: Seq[Setting[?]] = Seq(
     zioPluginJar := Def.taskDyn {
-      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/zio-clippy_${scalaBinaryVersion.value}.jar""")
+      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/${scalaBinaryVersion.value}/zio-clippy.jar""")
       if (jar.isFile) Def.task {
         jar
       }
