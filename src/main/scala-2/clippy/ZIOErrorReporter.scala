@@ -1,7 +1,7 @@
 package clippy
 
-import ansi.AnsiStringOps
-import utils.{Info, IsZIOTypeMismatch}
+import clippy.ansi.AnsiStringOps
+import clippy.utils.{Info, IsZIOTypeMismatch}
 
 import scala.reflect.internal.Reporter
 import scala.reflect.internal.util.Position
@@ -17,7 +17,7 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       if (diff.nonEmpty) {
         Some(s"""Your effect requires the following environment, but it was not provided:
                 |
-                |${diff.map(r => s"${"❯ ".red}$r").toList.mkString("\n")}
+                |${diff.map(r => s"${"❯ ".red}${r.bold}").toList.mkString("\n")}
                 |""".stripMargin)
       } else None
     }
@@ -28,8 +28,8 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       if (diff) {
         Some(s"""Your effect has an error type mismatch:
                 |
-                |${"❯ ".red}${"Required".bold}: ${required.E.bold}
-                |${"❯ ".red}${"Found   ".bold}: ${found.E.bold}
+                |${"❯ ".red}${"Required"}: ${required.E.bold}
+                |${"❯ ".red}${"Found   "}: ${found.E.bold}
                 |""".stripMargin)
       } else None
     }
@@ -40,17 +40,20 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       if (diff) {
         Some(s"""Your effect has a return type mismatch:
                 |
-                |${"❯ ".red}${"Required".bold}: ${required.A.bold}
-                |${"❯ ".red}${"Found   ".bold}: ${found.A.bold}
+                |${"❯ ".red}${"Required"}: ${required.A.bold}
+                |${"❯ ".red}${"Found   "}: ${found.A.bold}
                 |""".stripMargin)
       } else None
     }
 
-    val originalMessage = Option.when(showOriginalError) {
-      s"""|${"-" * 80}
-          |$msg
-          |""".stripMargin
-    }
+    val originalMessage =
+      if (showOriginalError)
+        Some(
+          s"""|${"-" * 80}
+              |$msg
+              |""".stripMargin
+        )
+      else None
 
     val allErrors = envMismatch :: errorMismatch :: returnMismatch :: originalMessage :: Nil
 

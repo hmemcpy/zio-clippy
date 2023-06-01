@@ -8,14 +8,13 @@ final class Plugin(override val global: Global) extends plugins.Plugin {
   override val name: String        = "clippy"
 
   private val knobs = Map(
-    "show-original-error" -> "Shows the original Scala type mismatch error",
+    "show-original-error" -> "Shows the original Scala type mismatch error"
   )
 
   override val optionsHelp: Option[String] = Some(
-    knobs
-      .map { case (key, help) =>
-        s"  -P:$name:$key".padTo(31, ' ') ++ help
-      }
+    knobs.map { case (key, help) =>
+      s"  -P:$name:$key".padTo(31, ' ') ++ help
+    }
       .mkString(System.lineSeparator)
   )
 

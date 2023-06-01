@@ -35,7 +35,7 @@ lazy val root = (project in file(".")).settings(
     val dir                  = (Compile / scalaSource).value
     val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
     val specific =
-      if (major == 2 && minor <= 12) file(s"${dir.getPath}-2.12-") :: Nil
+      if (major == 2 && minor <= 12) file(s"${dir.getPath}-2.12") :: Nil
       else Nil
 
     file(s"${dir.getPath}-$major") :: specific

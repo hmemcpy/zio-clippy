@@ -1,3 +1,14 @@
 # zio-clippy
 
-A Scala compiler plugin to provide better reporting for ZIO type mismatch errors.
+A Scala compiler plugin for better ZIO type mismatch errors.
+
+Go from this:
+
+![](.github/img/before.png)
+
+To this:
+
+
+## Getting started
+
+
