@@ -1,25 +1,16 @@
-package zio
+package clippy
 
-import zio.ansi.AnsiStringOps
-import zio.utils.{Info, IsZIOTypeMismatch}
+import ansi.AnsiStringOps
+import utils.{Info, IsZIOTypeMismatch}
 
 import scala.reflect.internal.Reporter
 import scala.reflect.internal.util.Position
-import scala.tools.nsc._
-import scala.tools.nsc.plugins.PluginComponent
-import scala.tools.nsc.reporters._
+import scala.tools.nsc.Settings
+import scala.tools.nsc.reporters.FilteringReporter
 
-final class Plugin(override val global: Global) extends plugins.Plugin {
-  override val description: String = "Better error reporting for ZIO"
-  override val name: String        = "ZIO Plugin"
-
-  global.reporter = new ZIOErrorReporter(global.settings, global.reporter)
-
-  override val components: List[PluginComponent] = Nil
-}
-
-class ZIOErrorReporter(val settings: Settings, underlying: Reporter) extends FilteringReporter {
-  private def makeError(found: Info, required: Info): String = {
+final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showOriginalError: Boolean)
+    extends FilteringReporter {
+  private def makeError(found: Info, required: Info, msg: String): String = {
     def envMismatch = {
       val diff = found.R -- required.R -- Set("Any")
 
@@ -55,7 +46,13 @@ class ZIOErrorReporter(val settings: Settings, underlying: Reporter) extends Fil
       } else None
     }
 
-    val allErrors = envMismatch :: errorMismatch :: returnMismatch :: Nil
+    val originalMessage = Option.when(showOriginalError) {
+      s"""|${"-" * 80}
+          |$msg
+          |""".stripMargin
+    }
+
+    val allErrors = envMismatch :: errorMismatch :: returnMismatch :: originalMessage :: Nil
 
     s"""|
         |${"  ZIO Type Mismatch  ".red.bold.inverted}
@@ -67,7 +64,7 @@ class ZIOErrorReporter(val settings: Settings, underlying: Reporter) extends Fil
   override def doReport(pos: Position, msg: String, severity: Severity): Unit =
     (severity, msg) match {
       case (Reporter.ERROR, IsZIOTypeMismatch(found, required)) =>
-        val error = makeError(found, required)
+        val error = makeError(found, required, msg)
         underlying.error(pos, error)
       case _ =>
         severity match {

@@ -1,4 +1,4 @@
-package zio
+package clippy
 
 object ansi {
   trait AnsiCode {

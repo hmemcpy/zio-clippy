@@ -1,4 +1,4 @@
-package zio
+package clippy
 
 import scala.util.matching.Regex
 
