@@ -46,11 +46,14 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       } else None
     }
 
-    val originalMessage = Option.when(showOriginalError) {
-      s"""|${"-" * 80}
-          |$msg
-          |""".stripMargin
-    }
+    val originalMessage =
+      if (showOriginalError)
+        Some(
+          s"""|${"-" * 80}
+              |$msg
+              |""".stripMargin
+        )
+      else None
 
     val allErrors = envMismatch :: errorMismatch :: returnMismatch :: originalMessage :: Nil
 
