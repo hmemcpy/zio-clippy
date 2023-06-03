@@ -25,35 +25,33 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
     def errorMismatch = {
       val diff = found.E != required.E && required.E != "Any"
 
-      if (diff) {
-        Some(s"""Your effect has an error type mismatch:
-                |
-                |${"❯ ".red}${"Required"}: ${required.E.bold}
-                |${"❯ ".red}${"Found   "}: ${found.E.bold}
-                |""".stripMargin)
-      } else None
+      Option.when(diff) {
+        s"""Your effect has an error type mismatch:
+           |
+           |${"❯ ".red}${"Required"}: ${required.E.bold}
+           |${"❯ ".red}${"Found   "}: ${found.E.bold}
+           |""".stripMargin
+      }
     }
 
     def returnMismatch = {
       val diff = found.A != required.A
 
-      if (diff) {
-        Some(s"""Your effect has a return type mismatch:
-                |
-                |${"❯ ".red}${"Required"}: ${required.A.bold}
-                |${"❯ ".red}${"Found   "}: ${found.A.bold}
-                |""".stripMargin)
-      } else None
+      Option.when(diff) {
+        s"""Your effect has a return type mismatch:
+           |
+           |${"❯ ".red}${"Required"}: ${required.A.bold}
+           |${"❯ ".red}${"Found   "}: ${found.A.bold}
+           |""".stripMargin
+      }
     }
 
     val originalMessage =
-      if (showOriginalError)
-        Some(
-          s"""|${"-" * 80}
-              |$msg
-              |""".stripMargin
-        )
-      else None
+      Option.when(showOriginalError) {
+        s"""|${"-" * 80}
+            |$msg
+            |""".stripMargin
+      }
 
     val allErrors = envMismatch :: errorMismatch :: returnMismatch :: originalMessage :: Nil
 
