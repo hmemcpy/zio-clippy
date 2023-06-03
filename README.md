@@ -28,6 +28,16 @@ Reload your project, and any ZIO type mismatch errors will now be rendered in a 
 
 The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugin supports both ZIO 1 and ZIO 2.
 
+### Alternative installation method
+
+Another way to install the plugin that does not require manually adding it to your `build.sbt` is to install it as a global sbt plugin:
+
+1. Checkout this repository
+2. Run `sbt install`
+3. In your project, reload sbt/bsp
+
+Running `sbt install` builds and places the plugin jar and the [`ZIOPlugin.scala`](https://github.com/hmemcpy/zio-clippy/blob/master/project/ZIOPlugin.scala) file in the global `~/.sbt/1.0/plugins` directory, allowing any sbt project to load the plugin automatically. To remove, delete the ZIOPlugin.scala file from `~/.sbt/1.0/plugins`.
+
 ## Technical information
 
 This plugin implements a custom `Reporter` class, intercepting any `type mismatch` errors that contain ZIO-specific information (it's all regex!) with all other errors passing through to the underlying reporter.
