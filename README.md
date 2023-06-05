@@ -2,8 +2,6 @@
 
 A Scala compiler plugin for better ZIO type mismatch errors.
 
-![](.github/img/main.png)
-
 Go from this:
 
 ![](.github/img/before.png)
@@ -11,6 +9,10 @@ Go from this:
 To this:
 
 ![](.github/img/after.png)
+
+IntelliJ IDEA   |  VSCode / Metals
+:--------------:|:---------------:
+![](.github/img/main.png) | ![](.github/img/vscode.png)
 
 ## Getting started
 
@@ -33,16 +35,10 @@ The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugi
 Another way to install the plugin that does not require manually adding it to your `build.sbt` is to install it as a global sbt plugin:
 
 1. Checkout this repository
-2. Run `sbt install`
+2. Run `sbt +install`
 3. In your project, reload sbt/bsp
 
 Running `sbt install` builds and places the plugin jar and the [`ZIOPlugin.scala`](https://github.com/hmemcpy/zio-clippy/blob/master/project/ZIOPlugin.scala) file in the global `~/.sbt/1.0/plugins` directory, allowing any sbt project to load the plugin automatically. To remove, delete the ZIOPlugin.scala file from `~/.sbt/1.0/plugins`.
-
-## Technical information
-
-This plugin implements a custom `Reporter` class, intercepting any `type mismatch` errors that contain ZIO-specific information (it's all regex!) with all other errors passing through to the underlying reporter.
-
-The plugin tries to extract the *found* and *required* dependencies from the error message and performs a set diff to remove the found types from the required ones. This leaves just the type(s) that are missing/were not provided to the effect.
 
 ## Additional configuration
 
@@ -53,6 +49,13 @@ To render the original type mismatch error in addition to the plugin output, add
 ```
 
 ![](.github/img/full-error.png)
+
+
+## Technical information
+
+This plugin implements a custom `Reporter` class, intercepting any `type mismatch` errors that contain ZIO-specific information (it's all regex!) with all other errors passing through to the underlying reporter.
+
+The plugin tries to extract the *found* and *required* dependencies from the error message and performs a set diff to remove the found types from the required ones. This leaves just the type(s) that are missing/were not provided to the effect.
 
 ## Acknowledgments
 
