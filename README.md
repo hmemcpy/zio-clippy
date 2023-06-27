@@ -14,6 +14,12 @@ IntelliJ IDEA   |  VSCode / Metals
 :--------------:|:---------------:
 ![](.github/img/main.png) | ![](.github/img/vscode.png)
 
+## Zymposium video
+
+Adam Fraser recently interviewed me, and we chatted about ZIO Clippy, how it came to be, and how it works internally. Watch the interview on YouTube!
+
+[<img src="https://i.ytimg.com/vi/EmhgOS5V1pA/maxresdefault.jpg" width="50%">](https://www.youtube.com/watch?v=EmhgOS5V1pA "Zymposium with Igal Tabachnik - ZIO Clippy")
+
 ## Getting started
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.hmemcpy/zio-clippy_2.12.svg?style=flat-square)
