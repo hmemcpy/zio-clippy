@@ -1,7 +1,7 @@
 package clippy
 
 import clippy.ansi.AnsiStringOps
-import clippy.utils.{Info, IsZIOTypeMismatch}
+import clippy.utils.{Info, IsZIOTypeError, ErrorKind}
 
 import scala.reflect.internal.Reporter
 import scala.reflect.internal.util.Position
@@ -10,12 +10,32 @@ import scala.tools.nsc.reporters.FilteringReporter
 
 final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showOriginalError: Boolean)
     extends FilteringReporter {
-  private def makeError(found: Info, required: Info, msg: String): String = {
+
+  private case class TitleMessages(envMismatch: String, errorMismatch: String, returnMismatch: String)
+  private val mismatchMessages = TitleMessages(
+    envMismatch = "Your effect requires the following environment, but it was not provided:",
+    errorMismatch = "Your effect has an error type mismatch:",
+    returnMismatch = "Your effect has a return type mismatch:"
+  )
+
+  private val overridingMessages = TitleMessages(
+    envMismatch =
+      "Your effect requires the following environment in overriding, but it was not presented in original type:",
+    errorMismatch = "Your effect has an error type mismatch in overriding:",
+    returnMismatch = "Your effect has a return type mismatch:"
+  )
+
+  private def makeError(found: Info, required: Info, msg: String, errorKind: ErrorKind): String = {
+    val titleMessages = errorKind match {
+      case ErrorKind.Overriding   => overridingMessages
+      case ErrorKind.TypeMismatch => mismatchMessages
+    }
+
     def envMismatch = {
       val diff = found.R -- required.R -- Set("Any")
 
       if (diff.nonEmpty) {
-        Some(s"""Your effect requires the following environment, but it was not provided:
+        Some(s"""${titleMessages.envMismatch}
                 |
                 |${diff.map(r => s"${"❯ ".red}${r.bold}").toList.mkString("\n")}
                 |""".stripMargin)
@@ -26,7 +46,7 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       val diff = found.E != required.E && required.E != "Any"
 
       Option.when(diff) {
-        s"""Your effect has an error type mismatch:
+        s"""${titleMessages.errorMismatch}
            |
            |${"❯ ".red}${"Required"}: ${required.E.bold}
            |${"❯ ".red}${"Found   "}: ${found.E.bold}
@@ -38,7 +58,7 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       val diff = found.A != required.A
 
       Option.when(diff) {
-        s"""Your effect has a return type mismatch:
+        s"""${titleMessages.returnMismatch}
            |
            |${"❯ ".red}${"Required"}: ${required.A.bold}
            |${"❯ ".red}${"Found   "}: ${found.A.bold}
@@ -64,8 +84,8 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
 
   override def doReport(pos: Position, msg: String, severity: Severity): Unit =
     (severity, msg) match {
-      case (Reporter.ERROR, IsZIOTypeMismatch(found, required)) =>
-        val error = makeError(found, required, msg)
+      case (Reporter.ERROR, IsZIOTypeError(kind, found, required)) =>
+        val error = makeError(found, required, msg, kind)
         underlying.error(pos, error)
       case _ =>
         severity match {
