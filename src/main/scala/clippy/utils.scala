@@ -5,6 +5,12 @@ import scala.util.matching.Regex
 object utils {
   case class Info private (R: Set[String], E: String, A: String)
 
+  sealed trait ErrorKind
+  object ErrorKind {
+    case object Overriding   extends ErrorKind
+    case object TypeMismatch extends ErrorKind
+  }
+
   object Info {
     // The original error message will needlessly dealias nested definitions.
     private val substitutions = Map(
@@ -34,16 +40,20 @@ object utils {
       }
   }
 
-  object IsZIOTypeMismatch {
+  object IsZIOTypeError {
     val mismatch = raw"zio\.(ZIO|ZLayer)\[(.+),([^,\]]+),(.+)\]".r
-    def unapply(msg: String): Option[(Info, Info)] =
-      if (msg.contains("type mismatch;")) {
-        mismatch.findAllMatchIn(msg).toList match {
-          case _ :: Info(found) :: _ :: Info(required) :: Nil => Some(found, required)
-          case Info(found) :: Info(required) :: _             => Some(found, required)
-          case _                                              => None
-        }
-      } else None
+
+    private def findMismatches(msg: String, kind: ErrorKind): Option[(ErrorKind, Info, Info)] =
+      mismatch.findAllMatchIn(msg).toList match {
+        case _ :: Info(found) :: _ :: Info(required) :: Nil => Some(kind, found, required)
+        case Info(found) :: Info(required) :: _             => Some(kind, found, required)
+        case _                                              => None
+      }
+
+    def unapply(msg: String): Option[(ErrorKind, Info, Info)] =
+      if (msg.contains("type mismatch;")) findMismatches(msg, ErrorKind.TypeMismatch)
+      else if (msg.contains("incompatible type in overriding")) findMismatches(msg, ErrorKind.Overriding)
+      else None
   }
 
   object IsCannotProveMismatch {
