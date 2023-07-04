@@ -27,7 +27,7 @@ Adam Fraser recently interviewed me, and we chatted about ZIO Clippy, how it cam
 Add the following to your `build.sbt` to install the plugin in your project:
 
 ```scala
-addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % "0.0.1")
+addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % "0.0.2")
 ```
 
 (replace with the latest available version from Maven Central)
