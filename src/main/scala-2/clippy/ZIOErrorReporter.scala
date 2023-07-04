@@ -1,7 +1,7 @@
 package clippy
 
 import clippy.ansi.AnsiStringOps
-import clippy.utils.{Info, IsZIOTypeError, ErrorKind}
+import clippy.utils.{ErrorKind, Info, IsZIOTypeError}
 
 import scala.reflect.internal.Reporter
 import scala.reflect.internal.util.Position
@@ -31,40 +31,33 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
       case ErrorKind.TypeMismatch => mismatchMessages
     }
 
-    def envMismatch = {
-      val diff = found.R -- required.R -- Set("Any")
+    val (rDiff, eDiff, aDiff) = found.diff(required)
 
-      if (diff.nonEmpty) {
-        Some(s"""${titleMessages.envMismatch}
-                |
-                |${diff.map(r => s"${"❯ ".red}${r.bold}").toList.mkString("\n")}
-                |""".stripMargin)
-      } else None
-    }
+    def envMismatch =
+      Option.when(rDiff.nonEmpty) {
+        s"""${titleMessages.envMismatch}
+           |
+           |${rDiff.map(r => s"${"❯ ".red}${r.bold}").toList.mkString("\n")}
+           |""".stripMargin
+      }
 
-    def errorMismatch = {
-      val diff = found.E != required.E && required.E != "Any"
-
-      Option.when(diff) {
+    def errorMismatch =
+      Option.when(eDiff) {
         s"""${titleMessages.errorMismatch}
            |
            |${"❯ ".red}${"Required"}: ${required.E.bold}
            |${"❯ ".red}${"Found   "}: ${found.E.bold}
            |""".stripMargin
       }
-    }
 
-    def returnMismatch = {
-      val diff = found.A != required.A
-
-      Option.when(diff) {
+    def returnMismatch =
+      Option.when(aDiff) {
         s"""${titleMessages.returnMismatch}
            |
            |${"❯ ".red}${"Required"}: ${required.A.bold}
            |${"❯ ".red}${"Found   "}: ${found.A.bold}
            |""".stripMargin
       }
-    }
 
     val originalMessage =
       Option.when(showOriginalError) {

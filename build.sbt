@@ -22,7 +22,7 @@ inThisBuild(
     ),
     scalaVersion := (ThisBuild / crossScalaVersions).value.head,
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio-test" % "2.0.10" % Test
+      "dev.zio" %% "zio-test" % "2.0.13" % Test
     )
   )
 )

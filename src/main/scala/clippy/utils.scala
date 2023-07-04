@@ -1,17 +1,29 @@
 package clippy
 
+import clippy.utils.Info.{any, anySet}
+
 import scala.util.matching.Regex
 
 object utils {
-  case class Info private (R: Set[String], E: String, A: String)
-
-  sealed trait ErrorKind
+  sealed trait ErrorKind extends Product with Serializable
   object ErrorKind {
     case object Overriding   extends ErrorKind
     case object TypeMismatch extends ErrorKind
   }
 
+  case class Info private (R: Set[String], E: String, A: String) { self =>
+
+    def diff(other: Info) =
+      (
+        self.R -- other.R -- anySet,
+        self.E != other.E && other.E != any,
+        self.A != other.A
+      )
+  }
   object Info {
+    val any    = "Any"
+    val anySet = Set(any)
+
     // The original error message will needlessly dealias nested definitions.
     private val substitutions = Map(
       "[+A]zio.ZIO[Any,Throwable,A]" -> "zio.Task"
@@ -24,7 +36,7 @@ object utils {
 
     def from(r: String, e: String, a: String) =
       Info(
-        R = r.split(raw" with ").map(normalize).toSet,
+        R = r.split(" with ").map(normalize).toSet,
         E = e,
         A = a
       )
@@ -41,7 +53,7 @@ object utils {
   }
 
   object IsZIOTypeError {
-    val mismatch = raw"zio\.(ZIO|ZLayer)\[(.+),([^,\]]+),(.+)\]".r
+    val mismatch = raw"zio\.(ZIO|ZLayer)\[(.+),([^,\]]+),([^,\]]+)]".r
 
     private def findMismatches(msg: String, kind: ErrorKind): Option[(ErrorKind, Info, Info)] =
       mismatch.findAllMatchIn(msg).toList match {
@@ -50,10 +62,16 @@ object utils {
         case _                                              => None
       }
 
-    def unapply(msg: String): Option[(ErrorKind, Info, Info)] =
-      if (msg.contains("type mismatch;")) findMismatches(msg, ErrorKind.TypeMismatch)
-      else if (msg.contains("incompatible type in overriding")) findMismatches(msg, ErrorKind.Overriding)
-      else None
+    val errorKinds = Map(
+      "type mismatch;" -> ErrorKind.TypeMismatch,
+      "incompatible type in overriding;" -> ErrorKind.Overriding,
+      // "polymorphic expression cannot be instantiated to expected type;" -> ErrorKind.Polymorphic
+    )
+
+    def unapply(msg: String): Option[(ErrorKind, Info, Info)] = {
+      val kind = errorKinds.collectFirst { case (k, v) if msg.contains(k) => v }
+      kind.flatMap(findMismatches(msg, _))
+    }
   }
 
   object IsCannotProveMismatch {
