@@ -78,7 +78,7 @@ object utils {
     val provide = raw"Cannot prove that (.+) <:< (.+)\.".r
     def unapply(msg: String): Option[(Info, Info)] =
       msg match {
-        case provide(found, required) => Some(Info.from(found, "", ""), Info.from(required, "", ""))
+        case provide(found, required) => Some((Info.from(found, "", ""), Info.from(required, "", "")))
         case _                        => None
       }
   }

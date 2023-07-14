@@ -1,7 +1,7 @@
 package clippy
 
 import clippy.ansi.AnsiStringOps
-import clippy.utils.{ErrorKind, Info, IsZIOTypeError}
+import clippy.utils.{ErrorKind, Info, IsCannotProveMismatch, IsZIOTypeError}
 
 import scala.reflect.internal.Reporter
 import scala.reflect.internal.util.Position
@@ -76,10 +76,18 @@ final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showO
   }
 
   override def doReport(pos: Position, msg: String, severity: Severity): Unit =
-    (severity, msg) match {
-      case (Reporter.ERROR, IsZIOTypeError(kind, found, required)) =>
-        val error = makeError(found, required, msg, kind)
-        underlying.error(pos, error)
+    severity match {
+      case Reporter.ERROR =>
+        msg match {
+          case IsZIOTypeError(kind, found, required) =>
+            val error = makeError(found, required, msg, kind)
+            underlying.error(pos, error)
+          case IsCannotProveMismatch(found, required) =>
+            val error = makeError(found, required, msg, ErrorKind.TypeMismatch)
+            underlying.error(pos, error)
+          case _ =>
+            underlying.error(pos, msg)
+        }
       case _ =>
         severity match {
           case Reporter.INFO    => underlying.echo(pos, msg)
