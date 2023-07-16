@@ -1,17 +1,18 @@
-package clippy
-
-import clippy.utils.Info.{any, anySet}
-
 import scala.util.matching.Regex
 
-object utils {
+package object clippy {
+  val any    = "Any"
+  val anySet = Set(any)
+
   sealed trait ErrorKind extends Product with Serializable
   object ErrorKind {
     case object Overriding   extends ErrorKind
     case object TypeMismatch extends ErrorKind
+    case object CannotProve  extends ErrorKind
   }
 
-  case class Info private (R: Set[String], E: String, A: String) { self =>
+  case class Info private (R: Set[String], E: String, A: String) {
+    self =>
 
     def diff(other: Info) =
       (
@@ -63,8 +64,8 @@ object utils {
       }
 
     val errorKinds = Map(
-      "type mismatch;" -> ErrorKind.TypeMismatch,
-      "incompatible type in overriding;" -> ErrorKind.Overriding,
+      "type mismatch;"                   -> ErrorKind.TypeMismatch,
+      "incompatible type in overriding;" -> ErrorKind.Overriding
       // "polymorphic expression cannot be instantiated to expected type;" -> ErrorKind.Polymorphic
     )
 
@@ -76,6 +77,7 @@ object utils {
 
   object IsCannotProveMismatch {
     val provide = raw"Cannot prove that (.+) <:< (.+)\.".r
+
     def unapply(msg: String): Option[(Info, Info)] =
       msg match {
         case provide(found, required) => Some((Info.from(found, "", ""), Info.from(required, "", "")))
