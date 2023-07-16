@@ -1,7 +1,7 @@
 package clippy
 
+import clippy.utils.IsZIOTypeError
 import zio.Scope
-import clippy.utils._
 import zio.test._
 object RegexSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] = suiteAll("type mismatch") {
@@ -42,7 +42,6 @@ object RegexSpec extends ZIOSpecDefault {
       }
 
       assertTrue(found.A == "A", required.A == "A")
-
     }
   }
 }

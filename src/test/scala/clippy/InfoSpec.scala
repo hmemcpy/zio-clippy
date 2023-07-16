@@ -1,6 +1,6 @@
 package clippy
 
-import utils.Info
+import clippy.utils.Info
 import zio.Scope
 import zio.test._
 
