@@ -1,7 +1,10 @@
 package clippy
 
+import clippy.OutputMessages.{cannotProveMessages, mismatchMessages, overridingMessages}
+import clippy.ansi.AnsiStringOps
+
 import scala.util.matching.Regex
- object utils {
+object utils {
   val any    = "Any"
   val anySet = Set(any)
 
@@ -22,6 +25,32 @@ import scala.util.matching.Regex
         self.A != other.A
       )
   }
+
+  def makeError(found: Info, required: Info, msg: String, errorKind: ErrorKind, showOriginalError: Boolean): String = {
+    val outputMessages = errorKind match {
+      case ErrorKind.Overriding   => overridingMessages
+      case ErrorKind.TypeMismatch => mismatchMessages
+      case ErrorKind.CannotProve  => cannotProveMessages
+    }
+
+    val messages = outputMessages.format(found, required)
+
+    val originalMessage =
+      Option.when(showOriginalError) {
+        s"""|${"-" * 80}
+            |$msg
+            |""".stripMargin
+      }
+
+    val allMessages = messages ++ originalMessage :: Nil
+
+    s"""|
+        |${"  ZIO Type Mismatch  ".red.bold.inverted}
+        |
+        |${allMessages.flatten.mkString("\n")}
+        |""".stripMargin
+  }
+
   object Info {
     val any    = "Any"
     val anySet = Set(any)

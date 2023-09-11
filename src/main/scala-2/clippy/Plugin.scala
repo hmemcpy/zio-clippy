@@ -2,7 +2,6 @@ package clippy
 
 import scala.tools.nsc._
 import scala.tools.nsc.plugins.PluginComponent
-
 final class Plugin(override val global: Global) extends plugins.Plugin {
   override val description: String = "Better error reporting for ZIO"
   override val name: String        = "clippy"
