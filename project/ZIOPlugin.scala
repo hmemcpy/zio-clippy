@@ -14,14 +14,16 @@ object ZIOPlugin extends AutoPlugin {
   import autoImport.*
   override lazy val projectSettings: Seq[Setting[?]] = Seq(
     zioPluginJar := Def.taskDyn {
-      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/${scalaBinaryVersion.value}/zio-clippy.jar""")
+      val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
+      val version = if (major == 2 && scalaVersion.value >= "2.13.12") scalaVersion.value else scalaBinaryVersion.value
+      val jar = file(s"""${sys.props("user.home")}/.cache/zio/lib/$version/zio-clippy.jar""")
       if (jar.isFile) Def.task {
         jar
       }
       else
         Def.task {
           streams.value.log.warn(
-            s"ZIO Plugin not found. Try\n\n      sbt ++${scalaVersion.value}! install\n\nin the ZIO Plugin repo."
+            s"ZIO Plugin not found. Try\n\n      sbt ++$version! install\n\nin the ZIO Plugin repo."
           )
           jar
         }

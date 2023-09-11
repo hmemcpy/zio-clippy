@@ -1,4 +1,4 @@
-import xerial.sbt.Sonatype._
+import xerial.sbt.Sonatype.*
 
 inThisBuild(
   Seq(
@@ -14,6 +14,7 @@ inThisBuild(
       )
     ),
     crossScalaVersions := List(
+      "2.13.12",
       "2.13.10",
       "2.12.15", // the version of scala used by sbt 1.6.2
       "2.12.16", // the version of scala used by sbt 1.7.2
@@ -34,9 +35,12 @@ lazy val root = (project in file(".")).settings(
   Compile / unmanagedSourceDirectories ++= {
     val dir                  = (Compile / scalaSource).value
     val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
-    val specific =
-      if (major == 2 && minor <= 12) file(s"${dir.getPath}-2.12") :: Nil
-      else Nil
+    val specific = major match {
+      case 2 if minor <= 12                                    => file(s"${dir.getPath}-2.12") :: Nil
+      case 2 if minor == 13 && scalaVersion.value < "2.13.12"  => file(s"${dir.getPath}-2.13.x") :: Nil
+      case 2 if minor == 13 && scalaVersion.value >= "2.13.12" => file(s"${dir.getPath}-2.13.12+") :: Nil
+      case _                                                   => Nil
+    }
 
     file(s"${dir.getPath}-$major") :: specific
   },
