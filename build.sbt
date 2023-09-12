@@ -30,16 +30,22 @@ inThisBuild(
 
 val install = taskKey[Unit]("Install the ZIO Clippy compiler plugin.")
 
+def beforeScala2_13_12(scalaVersion: VersionNumber): Boolean =
+  scalaVersion.matchesSemVer(SemanticSelector("<2.13.12"))
+def afterScala2_13_12(scalaVersion: VersionNumber): Boolean =
+  scalaVersion.matchesSemVer(SemanticSelector(">=2.13.12"))
+
 lazy val root = (project in file(".")).settings(
   name := "zio-clippy",
   Compile / unmanagedSourceDirectories ++= {
     val dir                  = (Compile / scalaSource).value
     val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
+    val versionNumber        = VersionNumber(scalaVersion.value)
     val specific = major match {
-      case 2 if minor <= 12                                    => file(s"${dir.getPath}-2.12") :: Nil
-      case 2 if minor == 13 && scalaVersion.value < "2.13.12"  => file(s"${dir.getPath}-2.13.x") :: Nil
-      case 2 if minor == 13 && scalaVersion.value >= "2.13.12" => file(s"${dir.getPath}-2.13.12+") :: Nil
-      case _                                                   => Nil
+      case 2 if minor <= 12                                      => file(s"${dir.getPath}-2.12") :: Nil
+      case 2 if minor == 13 && beforeScala2_13_12(versionNumber) => file(s"${dir.getPath}-2.13.x") :: Nil
+      case 2 if minor == 13 && afterScala2_13_12(versionNumber)  => file(s"${dir.getPath}-2.13.12+") :: Nil
+      case _                                                     => Nil
     }
 
     file(s"${dir.getPath}-$major") :: specific
