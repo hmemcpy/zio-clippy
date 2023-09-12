@@ -39,7 +39,7 @@ The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugi
 Add the following to your `build.sbt` to install the plugin in your project:
 
 ```scala
-addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % "0.0.2")
+addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % "0.0.4")
 ```
 
 (replace with the latest available version from Maven Central)
