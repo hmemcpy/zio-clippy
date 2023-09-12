@@ -34,17 +34,6 @@ Running `sbt +install` builds the plugin jar for all compatible Scala versions a
 
 The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugin supports both ZIO 1 and ZIO 2.
 
-### Alternative installation method
-
-Add the following to your `build.sbt` to install the plugin in your project:
-
-```scala
-addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % "0.0.4")
-```
-
-(replace with the latest available version from Maven Central)
-
-
 ## Additional configuration
 
 To render the original type mismatch error in addition to the plugin output, add the following flag to your `scalacOptions`:
