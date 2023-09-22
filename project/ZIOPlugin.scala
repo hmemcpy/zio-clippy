@@ -1,7 +1,7 @@
 package clippy
 
-import sbt.*
-import sbt.Keys.*
+import sbt._
+import sbt.Keys._
 
 object ZIOPlugin extends AutoPlugin {
 
@@ -13,8 +13,8 @@ object ZIOPlugin extends AutoPlugin {
   def afterScala2_13_12(scalaVersion: VersionNumber): Boolean =
     scalaVersion.matchesSemVer(SemanticSelector(">=2.13.12"))
 
-  import autoImport.*
-  override lazy val projectSettings: Seq[Setting[?]] = Seq(
+  import autoImport._
+  override lazy val projectSettings: Seq[Setting[_]] = Seq(
     zioPluginJar := Def.taskDyn {
       val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
       val versionNumber        = VersionNumber(scalaVersion.value)

@@ -7,7 +7,8 @@ final class Plugin(override val global: Global) extends plugins.Plugin {
   override val name: String        = "clippy"
 
   private val knobs = Map(
-    "show-original-error" -> "Shows the original Scala type mismatch error"
+    "show-original-error" -> "Shows the original Scala type mismatch error",
+    "additional-types"    -> "Additional types (fully-qualified) to consider when extracting type mismatches"
   )
 
   override val optionsHelp: Option[String] = Some(
@@ -20,16 +21,23 @@ final class Plugin(override val global: Global) extends plugins.Plugin {
   override def init(options: List[String], error: String => Unit): Boolean = {
     val (known, unknown) = options.partition(s => knobs.keys.exists(s.startsWith))
     if (unknown.nonEmpty) {
-      error(s"Unknown options: ${unknown.mkString(", ")}")
-      return false
+      global.reporter.echo(s"ZIO Clippy - Unknown options: ${unknown.mkString(", ")}")
     }
 
     val showOriginalError = known.contains("show-original-error")
+    val additionalTypes = options.find(_.contains("additional-types")).map(extractAdditionalTypes).getOrElse(Nil)
 
-    global.reporter = new ZIOErrorReporter(global.settings, global.reporter, showOriginalError)
+    global.reporter = new ZIOErrorReporter(global.settings, global.reporter, showOriginalError, additionalTypes)
 
     true
   }
+
+  private def extractAdditionalTypes(s: String): List[String] =
+    s.split(":")
+      .tail
+      .flatMap(_.split(","))
+      .map(_.trim)
+      .toList
 
   override val components: List[PluginComponent] = Nil
 }

@@ -8,8 +8,10 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.reporters.FilteringReporter
 
 // copied over to avoid dealing with Scala 2.13.12
-final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showOriginalError: Boolean)
+final class ZIOErrorReporter(val settings: Settings, underlying: Reporter, showOriginalError: Boolean, additionalTypes: List[String])
     extends FilteringReporter {
+
+  val IsZIOTypeError = new IsZIOTypeErrorExtractor(additionalTypes)
 
   override def doReport(pos: Position, msg: String, severity: Severity, actions: List[CodeAction]): Unit =
     severity match {
