@@ -8,6 +8,10 @@ object utils {
   val any    = "Any"
   val anySet = Set(any)
 
+  implicit final class AnySyntax[A](private val a: A) extends AnyVal {
+    def |>[B](f: A => B): B = f(a)
+  }
+
   sealed trait ErrorKind extends Product with Serializable
   object ErrorKind {
     case object Overriding   extends ErrorKind
@@ -67,29 +71,35 @@ object utils {
 
     def from(r: String, e: String, a: String) =
       Info(
-        R = r.split(" with ").map(normalize).toSet,
-        E = e,
-        A = a
+        R = r.split(" with ").map(_.trim |> normalize).toSet,
+        E = e.trim,
+        A = a.trim
       )
 
     def unapply(m: Regex.Match): Option[Info] =
-      (m.group(1), Option(m.group(2)), Option(m.group(3)), Option(m.group(4))) match {
-        case ("ZIO" | "ZLayer", Some(r), Some(e), Some(a)) => Some(from(r, e, a))
-        case ("UIO" | "ULayer", _, _, Some(a))             => Some(from("Any", "Nothing", a))
-        case ("URIO" | "URLayer", Some(r), _, Some(a))     => Some(from(r, "Nothing", a))
-        case ("Task", _, _, Some(a))                       => Some(from("Any", "Throwable", a))
-        case ("RIO", Some(r), _, Some(a))                  => Some(from(r, "Throwable", a))
-        case _                                             => None
+      (m.group(1), Option(m.group(2)), Option(m.group(3)), Option(m.group(4)), Option(m.group(5))) match {
+        case ("UIO" | "ULayer", _, _, _, Some(a))         => Some(from("Any", "Nothing", a))
+        case ("URIO" | "URLayer", _, Some(r), _, Some(a)) => Some(from(r, "Nothing", a))
+        case ("Task", _, _, _, Some(a))                   => Some(from("Any", "Throwable", a))
+        case ("RIO", Some(r), _, _, Some(a))              => Some(from(r, "Throwable", a))
+        case (_, _, Some(r), Some(e), Some(a))            => Some(from(r, e, a))
+        case _                                            => None
       }
   }
 
-  object IsZIOTypeError {
-    val mismatch = raw"zio\.(ZIO|ZLayer)\[(.+),([^,\]]+),([^,\]]+)]".r
+  class IsZIOTypeErrorExtractor(additionalTypes: List[String]) {
+    val brackets = raw"\[(.+),([^,\]]+),([^,\]]+)]"
+    val default  = raw"zio\.(ZIO|ZLayer)"
+    val matches  = buildRegex
+    private def buildRegex: Regex = {
+      val allRegex = default :: additionalTypes.map(_.replace(".", "\\."))
+      (allRegex.mkString("(", "|", ")") + brackets).r
+    }
 
     private def findMismatches(msg: String, kind: ErrorKind): Option[(ErrorKind, Info, Info)] =
-      mismatch.findAllMatchIn(msg).toList match {
-        case _ :: Info(found) :: _ :: Info(required) :: Nil => Some(kind, found, required)
-        case Info(found) :: Info(required) :: _             => Some(kind, found, required)
+      matches.findAllMatchIn(msg).toList match {
+        case _ :: Info(found) :: _ :: Info(required) :: Nil => Some((kind, found, required))
+        case Info(found) :: Info(required) :: _             => Some((kind, found, required))
         case _                                              => None
       }
 
