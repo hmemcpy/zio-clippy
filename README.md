@@ -34,16 +34,39 @@ Running `sbt +install` builds the plugin jar for all compatible Scala versions a
 
 The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugin supports both ZIO 1 and ZIO 2.
 
+### Alternative installation method
+
+If desired, add the following to your `build.sbt` to install the plugin in your project:
+
+```scala
+addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % <latest version>)
+```
+
+(replace with the latest available version from Maven Central)
+
+
 ## Additional configuration
+
+Note: The recommended way to specify additional configuration is via a global sbt configuration file, without directly modifying your project's `build.sbt`.
+
+Create a file `clippy.sbt` in your global sbt directory, `~/.sbt/1.0`. You can specify the options in this file, and they will be loaded automatically by your project.
+
+### Original type mismatch error
 
 To render the original type mismatch error in addition to the plugin output, add the following flag to your `scalacOptions`:
 
 ```scala
-"-P:clippy:show-original-error"
+scalaOptions += "-P:clippy:show-original-error"
 ```
-
 ![](.github/img/full-error.png)
 
+### Additional types for detection
+
+ZIO Clippy support additional, *ZIO-like* types when parsing type mismatch errors. Any type that has 3 type parameters (e.g. `org.company.Saga[R, E, A]`) can be specified. To enable, provide a comma-separated *fully-qualified* list of names to the following option:
+
+```scala
+scalaOptions += "-P:clippy:additional-types:zio.flow.ZFlow,org.company.Saga"
+```
 
 ## Technical information
 
