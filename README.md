@@ -56,7 +56,7 @@ Create a file `clippy.sbt` in your global sbt directory, `~/.sbt/1.0`. You can s
 To render the original type mismatch error in addition to the plugin output, add the following flag to your `scalacOptions`:
 
 ```scala
-scalaOptions += "-P:clippy:show-original-error"
+scalacOptions += "-P:clippy:show-original-error"
 ```
 ![](.github/img/full-error.png)
 
@@ -65,7 +65,7 @@ scalaOptions += "-P:clippy:show-original-error"
 ZIO Clippy support additional, *ZIO-like* types when parsing type mismatch errors. Any type that has 3 type parameters (e.g. `org.company.Saga[R, E, A]`) can be specified. To enable, provide a comma-separated *fully-qualified* list of names to the following option:
 
 ```scala
-scalaOptions += "-P:clippy:additional-types:zio.flow.ZFlow,org.company.Saga"
+scalacOptions += "-P:clippy:additional-types:zio.flow.ZFlow,org.company.Saga"
 ```
 
 ## Technical information
