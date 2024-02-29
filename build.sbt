@@ -14,6 +14,7 @@ inThisBuild(
       )
     ),
     crossScalaVersions := List(
+      "2.13.13",
       "2.13.12",
       "2.13.10",
       "2.12.15", // the version of scala used by sbt 1.6.2
