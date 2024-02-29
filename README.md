@@ -22,8 +22,6 @@ Adam Fraser recently interviewed me, and we chatted about ZIO Clippy, how it cam
 
 ## Getting started
 
-![Maven Central](https://img.shields.io/maven-central/v/com.hmemcpy/zio-clippy_2.12.svg?style=flat-square)
-
 The recommended way to install this plugin is by installing it as a global sbt plugin:
 
 1. Clone this repository to your local computer
@@ -33,17 +31,6 @@ The recommended way to install this plugin is by installing it as a global sbt p
 Running `sbt +install` builds the plugin jar for all compatible Scala versions and places the [`ZIOPlugin.scala`](https://github.com/hmemcpy/zio-clippy/blob/master/project/ZIOPlugin.scala) file in the global `~/.sbt/1.0/plugins` directory, allowing any sbt project to load the plugin automatically. To remove, delete the ZIOPlugin.scala file from `~/.sbt/1.0/plugins`.
 
 The plugin supports Scala 2.12, 2.13 with Scala 3 support coming soon! The plugin supports both ZIO 1 and ZIO 2.
-
-### Alternative installation method
-
-If desired, add the following to your `build.sbt` to install the plugin in your project:
-
-```scala
-addCompilerPlugin("com.hmemcpy" %% "zio-clippy" % <latest version>)
-```
-
-(replace with the latest available version from Maven Central)
-
 
 ## Additional configuration
 
