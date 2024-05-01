@@ -14,6 +14,7 @@ inThisBuild(
       )
     ),
     crossScalaVersions := List(
+      "2.13.14",
       "2.13.13",
       "2.13.12",
       "2.13.10",
